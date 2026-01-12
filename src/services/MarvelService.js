@@ -1,3 +1,5 @@
+import { useHttp } from "../hooks/useHttp";
+
 const useMarvelService = () => {
     const { loading, request, error, clearError } = useHttp();
 
@@ -5,6 +7,8 @@ const useMarvelService = () => {
     const _apiKey = "apikey=d4eecb0c66dedbfae4eab45d312fc1df";
     const _baseOffset = 0;
     const _baseLimit = 9;
+    const _baseComicOffset = 0;
+    const _baseComicLimit = 8;
 
     const getResource = async (url) => {
         let res = await fetch(url);
@@ -15,7 +19,26 @@ const useMarvelService = () => {
 
         return await res.json();
     };
-    
+
+    const getAllComics = async (
+        offset = _baseComicOffset,
+        limit = _baseComicLimit
+    ) => {
+        const res = await getResource(
+            `https://marvel-server-zeta.vercel.app/comics?limit=${limit}&offset=${offset}&${_apiKey}`
+        );
+
+        return res.data.results.map(_transformComics);
+    };
+
+    const getComic = async (id) => {
+        const res = await getResource(
+            `https://marvel-server-zeta.vercel.app/comics/${id}?${_apiKey}`
+        );
+
+        return _transformComics(res.data.results[0]);
+    };
+
     const getAllCharacters = async (
         offset = _baseOffset,
         limit = _baseLimit
@@ -28,11 +51,21 @@ const useMarvelService = () => {
     };
 
     const getCharacter = async (id) => {
-        const res = await getResource(
-            `${_apiBase}characters/${id}?${_apiKey}`
-        );
+        const res = await getResource(`${_apiBase}characters/${id}?${_apiKey}`);
 
         return _transformCharacter(res.data.results[0]);
+    };
+
+    const _transformComics = (char) => {
+        return {
+            id: char.id,
+            description: char.description,
+            pages: char.pageCount,
+            price: char.prices[0].price,
+            languages: char.languages,
+            picture: char.thumbnail.path + "." + char.thumbnail.extension,
+            title: char.title,
+        };
     };
 
     const _transformCharacter = (char) => {
@@ -46,6 +79,16 @@ const useMarvelService = () => {
             comics: char.comics.items,
         };
     };
-}
+
+    return {
+        loading,
+        error,
+        clearError,
+        getAllCharacters,
+        getCharacter,
+        getAllComics,
+        getComic,
+    };
+};
 
 export default useMarvelService;
