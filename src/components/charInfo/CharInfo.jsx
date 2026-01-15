@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import PropTypes from "prop-types";
 
 import useMarvelService from "../../services/MarvelService";
@@ -10,12 +11,18 @@ import "./charInfo.scss";
 
 const CharInfo = (props) => {
     const [char, setChar] = useState(null);
+    const [comicChar, setComicChar] = useState(null);
 
-    const { loading, error, getCharacter, clearError } = useMarvelService();
+    const { loading, error, getCharacter, clearError, getAllComics } =
+        useMarvelService();
 
     useEffect(() => {
         updateChar();
     }, [props.charId]);
+
+    useEffect(() => {
+        updateComicChar();
+    }, []);
 
     const updateChar = () => {
         const { charId } = props;
@@ -27,14 +34,25 @@ const CharInfo = (props) => {
         getCharacter(charId).then(onCharLoaded);
     };
 
+    const updateComicChar = () => {
+        clearError();
+        getAllComics().then(onComicCharLoaded);
+    };
+
     const onCharLoaded = (char) => {
         setChar(char);
+    };
+
+    const onComicCharLoaded = (comicChar) => {
+        setComicChar(comicChar);
     };
 
     const skeleton = char || loading || error ? null : <Skeleton />;
     const errorMessage = error ? <ErrorMessage /> : null;
     const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error || !char) ? <View char={char} /> : null;
+    const content = !(loading || error || !char) ? (
+        <View char={char} comicChar={comicChar} />
+    ) : null;
 
     return (
         <div className="char__info">
@@ -46,7 +64,7 @@ const CharInfo = (props) => {
     );
 };
 
-const View = ({ char }) => {
+const View = ({ char, comicChar }) => {
     const { name, description, thumbnail, homepage, wiki, comics } = char;
 
     let imgStyle = { objectFit: "cover" };
@@ -56,6 +74,8 @@ const View = ({ char }) => {
     ) {
         imgStyle = { objectFit: "contain" };
     }
+
+    console.log(comicChar);
 
     return (
         <>
@@ -80,12 +100,20 @@ const View = ({ char }) => {
                     ? null
                     : "There is no comics with this character"}
                 {comics.map((item, i) => {
-                    if (i > 9) return;
-                    return (
-                        <li key={i} className="char__comics-item">
-                            {item.name}
-                        </li>
-                    );
+                    return comicChar.map((comic) => {
+                        if (i > 9) return;
+                        if (comic.title === item) {
+                            return (
+                                <Link
+                                    to={`/comics/${comic.id}`}
+                                    key={i}
+                                    className="char__comics-item"
+                                >
+                                    {item}
+                                </Link>
+                            );
+                        }
+                    });
                 })}
             </ul>
         </>

@@ -36,6 +36,8 @@ const useMarvelService = () => {
             `https://marvel-server-zeta.vercel.app/comics/${id}?${_apiKey}`
         );
 
+        console.log(res);
+
         return _transformComics(res.data.results[0]);
     };
 
@@ -62,7 +64,7 @@ const useMarvelService = () => {
             description: char.description,
             pages: char.pageCount,
             price: char.prices[0].price,
-            languages: char.languages,
+            languages: char.textObjects.languages,
             picture: char.thumbnail.path + "." + char.thumbnail.extension,
             title: char.title,
         };
