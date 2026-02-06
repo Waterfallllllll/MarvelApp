@@ -1,10 +1,12 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, createRef } from "react";
 import {
     BrowserRouter as Router,
     Route,
     Switch,
-} from "react-router-dom/cjs/react-router-dom.min";
-
+    useLocation,
+    matchPath
+} from "react-router-dom";
+import { CSSTransition, SwitchTransition } from "react-transition-group";
 import AppHeader from "../appHeader/AppHeader";
 import Spinner from "../spinner/Spinner";
 
@@ -15,30 +17,81 @@ const SingleComicPage = lazy(() =>
     import("../SingleComicPage.jsx/SingleComicPage")
 );
 
+const routes = [
+    {
+        path: "/",
+        exact: true,
+        Component: MainPage,
+        nodeRef: createRef(),
+    },
+    {
+        path: "/comics",
+        exact: true,
+        Component: ComicsPage,
+        nodeRef: createRef(),
+    },
+    {
+        path: "/comics/:comicId",
+        exact: true,
+        Component: SingleComicPage,
+        nodeRef: createRef(),
+    },
+    {
+        path: "*",
+        Component: Page404,
+        nodeRef: createRef(),
+    },
+];
+
+const AppContent = () => {
+    const location = useLocation();
+
+    const currentRoute = routes.find(route =>
+        matchPath(location.pathname, {
+            path: route.path,
+            exact: route.exact
+        })
+    ) || routes[routes.length - 1];
+
+    console.log(location);
+
+    return (
+        <div className="app">
+            <AppHeader />
+            <main>
+                <Suspense fallback={<Spinner />}>
+                    <SwitchTransition>
+                        <CSSTransition
+                            key={location.pathname}
+                            nodeRef={currentRoute.nodeRef}
+                            timeout={300}
+                            classNames="page"
+                            unmountOnExit
+                        >
+                            <div ref={currentRoute.nodeRef} className="page">
+                                <Switch location={location}>
+                                    {routes.map(({ path, exact, Component }) => (
+                                        <Route
+                                            key={path}
+                                            path={path}
+                                            exact={exact}
+                                            component={Component}
+                                        />
+                                    ))}
+                                </Switch>
+                            </div>
+                        </CSSTransition>
+                    </SwitchTransition>
+                </Suspense>
+            </main>
+        </div>
+    );
+};
+
 const App = () => {
     return (
         <Router>
-            <div className="app">
-                <AppHeader />
-                <main>
-                    <Suspense fallback={<Spinner />}>
-                        <Switch>
-                            <Route exact path="/">
-                                <MainPage />
-                            </Route>
-                            <Route exact path="/comics">
-                                <ComicsPage />
-                            </Route>
-                            <Route exact path="/comics/:comicId">
-                                <SingleComicPage />
-                            </Route>
-                            <Route path="*">
-                                <Page404 />
-                            </Route>
-                        </Switch>
-                    </Suspense>
-                </main>
-            </div>
+            <AppContent />
         </Router>
     );
 };

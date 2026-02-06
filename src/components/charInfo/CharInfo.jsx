@@ -75,8 +75,6 @@ const View = ({ char, comicChar }) => {
         imgStyle = { objectFit: "contain" };
     }
 
-    console.log(comicChar);
-
     return (
         <>
             <div className="char__basics">
