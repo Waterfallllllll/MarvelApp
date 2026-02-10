@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { Link } from "react-router-dom";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 import useMarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
@@ -37,22 +38,40 @@ const ComicsList = () => {
 
     function renderItems(arr) {
         const items = arr.map((item, i) => {
+            const itemRef = createRef(null);
             return (
-                <li className="comics__item" key={i}>
-                    <Link to={`/comics/${item.id}`}>
-                        <img
-                            src={item.picture}
-                            alt={item.title}
-                            className="comics__item-img"
-                        />
-                        <div className="comics__item-name">{item.title}</div>
-                        <div className="comics__item-price">{item.price}$</div>
-                    </Link>
-                </li>
+                <CSSTransition
+                    key={item.id}
+                    in={true}
+                    tabIndex={0}
+                    timeout={500}
+                    classNames="comics__item"
+                    nodeRef={itemRef}
+                >
+                    <li className="comics__item" key={i} ref={itemRef}>
+                        <Link to={`/comics/${item.id}`}>
+                            <img
+                                src={item.picture}
+                                alt={item.title}
+                                className="comics__item-img"
+                            />
+                            <div className="comics__item-name">
+                                {item.title}
+                            </div>
+                            <div className="comics__item-price">
+                                {item.price}$
+                            </div>
+                        </Link>
+                    </li>
+                </CSSTransition>
             );
         });
 
-        return <ul className="comics__grid">{items}</ul>;
+        return (
+            <ul className="comics__grid">
+                <TransitionGroup component={null}>{items}</TransitionGroup>
+            </ul>
+        );
     }
 
     const items = renderItems(comicsList);

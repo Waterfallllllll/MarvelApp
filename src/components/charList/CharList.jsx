@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-
+import { useState, useEffect, useRef, createRef } from "react";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessage/ErrorMessage";
 import useMarvelService from "../../services/MarvelService";
@@ -36,53 +36,73 @@ const CharList = (props) => {
 
     const itemRefs = useRef([]);
 
-    const focusOnItem = (id) => {
+    const focusOnItemRef = (id) => {
         itemRefs.current.forEach((item) =>
-            item.classList.remove("char__item_selected")
+            item.classList.remove("char__item_selected"),
         );
+        item.classList.remove("char__item_selected");
+
         itemRefs.current[id].classList.add("char__item_selected");
         itemRefs.current[id].focus();
     };
 
-    function renderItems(arr) {
+    const focusOnItem = (ref) => {
+        ref.current.classList.add("char__item_selected");
+        ref.current.focus();
+    };
+
+    const blurOnItem = (ref) => {
+        ref.current.classList.remove("char__item_selected");
+    };
+
+    const renderItems = (arr) => {
         const items = arr.map((item, i) => {
-            let imgStyle = { objectFit: "cover" };
-            if (
-                item.thumbnail ===
-                "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
-            ) {
+            let imgStyle;
+            if (item.thumbnail.includes("image_not_available")) {
                 imgStyle = { objectFit: "unset" };
             }
-
+            const itemRef = createRef(null);
             return (
-                <li
-                    className="char__item"
-                    tabIndex={0}
-                    ref={(el) => (itemRefs.current[i] = el)}
+                <CSSTransition
                     key={item.id}
-                    onClick={() => {
-                        props.onCharSelected(item.id);
-                        focusOnItem(i);
-                    }}
-                    onKeyPress={(e) => {
-                        if (e.key === " " || e.key === "Enter") {
-                            props.onCharSelected(item.id);
-                            focusOnItem(i);
-                        }
-                    }}
+                    in={true}
+                    timeout={500}
+                    classNames="char__item"
+                    nodeRef={itemRef}
                 >
-                    <img
-                        src={item.thumbnail}
-                        alt={item.name}
-                        style={imgStyle}
-                    />
-                    <div className="char__name">{item.name}</div>
-                </li>
+                    <li
+                        className="char__item"
+                        key={item.id}
+                        tabIndex={0}
+                        ref={itemRef}
+                        onClick={() => {
+                            props.onCharSelected(item.id);
+                            focusOnItem(itemRef);
+                        }}
+                        onBlur={() => blurOnItem(itemRef)}
+                        onKeyPress={(e) => {
+                            if (e.key === "Enter") {
+                                props.onCharSelected(item.id);
+                                focusOnItem(itemRef);
+                            }
+                        }}
+                    >
+                        <img
+                            style={imgStyle}
+                            src={item.thumbnail}
+                            alt={item.name}
+                        />
+                        <div className="char__name">{item.name}</div>
+                    </li>
+                </CSSTransition>
             );
         });
-
-        return <ul className="char__grid">{items}</ul>;
-    }
+        return (
+            <ul className="char__grid">
+                <TransitionGroup component={null}>{items}</TransitionGroup>
+            </ul>
+        );
+    };
 
     const items = renderItems(charList);
 
