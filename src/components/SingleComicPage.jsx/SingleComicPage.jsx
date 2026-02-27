@@ -44,8 +44,6 @@ const SingleComicPage = () => {
 const View = ({ comic }) => {
     const { title, description, pages, picture, languages, price } = comic;
 
-    console.log(comic);
-
     return (
         <div className="single-comic">
             <img src={picture} alt={title} className="single-comic__img" />

@@ -16,6 +16,7 @@ const ComicsPage = lazy(() => import("../pages/ComicsPage"));
 const SingleComicPage = lazy(() =>
     import("../SingleComicPage.jsx/SingleComicPage")
 );
+const CharacterDescriptionPage = lazy(() => import("../pages/CharacterDescriptionPage"));
 
 const routes = [
     {
@@ -34,6 +35,12 @@ const routes = [
         path: "/comics/:comicId",
         exact: true,
         Component: SingleComicPage,
+        nodeRef: createRef(),
+    },
+    {   
+        path: "/:characterDescriptionId",
+        exact: true,
+        Component: CharacterDescriptionPage,
         nodeRef: createRef(),
     },
     {
