@@ -7,27 +7,29 @@ import useMarvelService from "../../services/MarvelService";
 
 const CharSearch = () => {
     const [char, setChar] = useState(null); // Сюда помещается персонаж, который был найден в нашей апишке
-    const {loading, error, getCharacterByName, clearError} = useMarvelService();
+    const { loading, error, getCharacterByName, clearError } =
+        useMarvelService();
 
     const onCharLoaded = (char) => {
         setChar(char);
-    }
+    };
 
     const updateChar = (name) => {
         clearError();
 
         getCharacterByName(name).then(onCharLoaded);
-    }
-    
+    };
+
+    const errorMessage = 
+
     return (
         <Formik
             initialValues={{ name: "" }}
             validationSchema={Yup.object({
                 name: Yup.string().required("This field is required"),
             })}
-            onSubmit={async (values, { setSubmitting }) => {
-                updateChar;
-                setSubmitting(false);
+            onSubmit={({ name }) => {
+                updateChar(name);
             }}
         >
             <Form className="char__search">

@@ -5,7 +5,7 @@ import CharList from "../charList/CharList";
 import CharInfo from "../charInfo/CharInfo";
 import CharSearch from "../charSearch/CharSearch";
 import ErrorBoundary from "../errorBoundary/ErrorBoundary";
-
+import CharacterDescriptionPage from "./CharacterDescriptionPage";
 import decoration from "../../resources/img/vision.png";
 
 const MainPage = () => {
@@ -32,7 +32,7 @@ const MainPage = () => {
                         <CharSearch />
                     </ErrorBoundary>
                 </div>
-            </div>
+            </div> 
             <img className="bg-decoration" src={decoration} alt="vision" />
         </>
     );

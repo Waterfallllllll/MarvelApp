@@ -22,10 +22,10 @@ const useMarvelService = () => {
 
     const getAllComics = async (
         offset = _baseComicOffset,
-        limit = _baseComicLimit
+        limit = _baseComicLimit,
     ) => {
         const res = await getResource(
-            `https://marvel-server-zeta.vercel.app/comics?limit=${limit}&offset=${offset}&${_apiKey}`
+            `https://marvel-server-zeta.vercel.app/comics?limit=${limit}&offset=${offset}&${_apiKey}`,
         );
 
         return res.data.results.map(_transformComics);
@@ -33,7 +33,7 @@ const useMarvelService = () => {
 
     const getComic = async (id) => {
         const res = await getResource(
-            `https://marvel-server-zeta.vercel.app/comics/${id}?${_apiKey}`
+            `https://marvel-server-zeta.vercel.app/comics/${id}?${_apiKey}`,
         );
 
         console.log(res);
@@ -43,10 +43,10 @@ const useMarvelService = () => {
 
     const getAllCharacters = async (
         offset = _baseOffset,
-        limit = _baseLimit
+        limit = _baseLimit,
     ) => {
         const res = await getResource(
-            `${_apiBase}characters?limit=${limit}&offset=${offset}&${_apiKey}`
+            `${_apiBase}characters?limit=${limit}&offset=${offset}&${_apiKey}`,
         );
 
         return res.data.results.map(_transformCharacter);
@@ -55,9 +55,15 @@ const useMarvelService = () => {
     const getCharacter = async (id) => {
         const res = await getResource(`${_apiBase}characters/${id}?${_apiKey}`);
 
-        
-
         return _transformCharacter(res.data.results[0]);
+    };
+
+    const getCharacterByName = async (name) => {
+        const res = await getResource(
+            `${_apiBase}characters?name=${name}&${_apiKey}`,
+        );
+
+        return res.data.results.map(_transformCharacter);
     };
 
     const _transformComics = (char) => {
@@ -92,6 +98,7 @@ const useMarvelService = () => {
         getCharacter,
         getAllComics,
         getComic,
+        getCharacterByName
     };
 };
 
