@@ -35,5 +35,19 @@
         &-button {
             margin-left: 24px;
         }
+        &-success {
+            font-weight: 700;
+            font-size: 18px;
+            line-height: 21px;
+            color: #03710e;
+            margin-top: 22px;
+        }
+        &-wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+        &-gray-btn {
+            margin-top: 15px;
+        }
     }
 }

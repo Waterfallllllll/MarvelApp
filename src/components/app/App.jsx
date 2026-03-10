@@ -13,10 +13,11 @@ import Spinner from "../spinner/Spinner";
 const Page404 = lazy(() => import("../pages/404"));
 const MainPage = lazy(() => import("../pages/MainPage"));
 const ComicsPage = lazy(() => import("../pages/ComicsPage"));
-const SingleComicPage = lazy(() =>
-    import("../SingleComicPage.jsx/SingleComicPage")
+const SinglePage = lazy(() =>
+    import("../pages/SinglePage")
 );
-const CharacterDescriptionPage = lazy(() => import("../pages/CharacterDescriptionPage"));
+const SingleComicLayout = lazy(() => import("../pages/singleComicLayout/SingleComicLayout"));
+const SingleCharacterLayout = lazy(() => import("../pages/singleCharacterLayout/SingleCharacterLayout"));
 
 const routes = [
     {
@@ -32,15 +33,23 @@ const routes = [
         nodeRef: createRef(),
     },
     {
-        path: "/comics/:comicId",
+        path: "/comics/:id",
         exact: true,
-        Component: SingleComicPage,
+        Component: SinglePage,
+        componentProps: {
+            Component: SingleComicLayout,
+            dataType: "comic",
+        },
         nodeRef: createRef(),
     },
-    {   
-        path: "/:characterDescriptionId",
+    {
+        path: "/characters/:id",
         exact: true,
-        Component: CharacterDescriptionPage,
+        Component: SinglePage,
+        componentProps: {
+            Component: SingleCharacterLayout,
+            dataType: "character",
+        },
         nodeRef: createRef(),
     },
     {
@@ -60,8 +69,6 @@ const AppContent = () => {
         })
     ) || routes[routes.length - 1];
 
-    console.log(location);
-
     return (
         <div className="app">
             <AppHeader />
@@ -77,12 +84,14 @@ const AppContent = () => {
                         >
                             <div ref={currentRoute.nodeRef} className="page">
                                 <Switch location={location}>
-                                    {routes.map(({ path, exact, Component }) => (
+                                    {routes.map(({ path, exact, Component, componentProps }) => (
                                         <Route
                                             key={path}
                                             path={path}
                                             exact={exact}
-                                            component={Component}
+                                            render={(routeProps) => (
+                                                <Component {...routeProps} {...componentProps}/>
+                                            )}                            
                                         />
                                     ))}
                                 </Switch>

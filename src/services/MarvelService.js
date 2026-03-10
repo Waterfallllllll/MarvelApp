@@ -36,8 +36,6 @@ const useMarvelService = () => {
             `https://marvel-server-zeta.vercel.app/comics/${id}?${_apiKey}`,
         );
 
-        console.log(res);
-
         return _transformComics(res.data.results[0]);
     };
 
