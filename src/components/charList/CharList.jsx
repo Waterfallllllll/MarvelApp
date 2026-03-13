@@ -1,9 +1,25 @@
-import { useState, useEffect, useRef, createRef } from "react";
+import { useState, useEffect, useRef, createRef, useMemo } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessage/ErrorMessage";
 import useMarvelService from "../../services/MarvelService";
+
 import "./charList.scss";
+
+const setContent = (process, Component, newItemLoading) => {
+    switch (process) {
+        case "waiting":
+            return <Spinner />;
+        case "loading":
+            return newItemLoading ? <Component /> : <Spinner />;
+        case "confirmed":
+            return <Component />;
+        case "error":
+            return <ErrorMessage />;
+        default:
+            throw new Error("Unexpected process state");
+    }
+}
 
 const CharList = (props) => {
     const [charList, setCharList] = useState([]);
@@ -11,7 +27,7 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(0);
     const [charEnded, setCharEnded] = useState(false);
 
-    const { loading, error, getAllCharacters } = useMarvelService();
+    const { loading, error, getAllCharacters, process, setProcess } = useMarvelService();
 
     useEffect(() => {
         onRequest(offset, true);
@@ -19,7 +35,7 @@ const CharList = (props) => {
 
     const onRequest = (offset, initial) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true);
-        getAllCharacters(offset).then(onCharListLoaded);
+        getAllCharacters(offset).then(onCharListLoaded).then(() => setProcess("confirmed"));
     };
 
     const onCharListLoaded = (newCharList) => {
@@ -104,16 +120,11 @@ const CharList = (props) => {
         );
     };
 
-    const items = renderItems(charList);
-
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading && !newItemLoading ? <Spinner /> : null;
+    const elements = useMemo(() => { return setContent(process, () => renderItems(charList), newItemLoading) }, [process, charList, newItemLoading]);
 
     return (
         <div className="char__list">
-            {errorMessage}
-            {spinner}
-            {items}
+            {elements}
             <button
                 className="button button__main button__long"
                 disabled={newItemLoading}

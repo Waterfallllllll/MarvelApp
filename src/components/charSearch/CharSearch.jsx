@@ -6,9 +6,24 @@ import "./charSearch.scss";
 import useMarvelService from "../../services/MarvelService";
 import ErrorMessage from "../errorMessage/ErrorMessage";
 
+const setContent = (process, results) => {
+    switch (process) {
+        case "waiting":
+            return null;
+        case "loading":
+            return null;
+        case "confirmed":
+            return results;
+        case "error":
+            return <ErrorMessage />;
+        default:
+            throw new Error("Unexpected process state");
+    }
+}
+
 const CharSearch = () => {
     const [char, setChar] = useState(null); // Сюда помещается персонаж, который был найден в нашей апишке
-    const { loading, error, getCharacterByName, clearError } =
+    const { getCharacterByName, clearError, process, setProcess } =
         useMarvelService();
 
     const onCharLoaded = (char) => {
@@ -17,11 +32,9 @@ const CharSearch = () => {
 
     const updateChar = (name) => {
         clearError();
-
-        getCharacterByName(name).then(onCharLoaded);
+        getCharacterByName(name).then(onCharLoaded).then(() => setProcess("confirmed"));
     };
 
-    const errorMessage = error ? <div className="char__search-critical-error"><ErrorMessage /></div> : null;
     const results = !char ? null : char.length > 0 ?
         <div className="char__search-wrapper">
             <div className="char__search-success">There is! Visit {char[0].name} page?</div>
@@ -58,7 +71,7 @@ const CharSearch = () => {
                     <button
                         type="submit"
                         className="button button__main char__search-button"
-                        disabled={loading}
+                        disabled={process === "loading"}
                     >
                         <div className="inner">Find</div>
                     </button>
@@ -69,8 +82,7 @@ const CharSearch = () => {
                     />
                 </Form>
             </Formik>
-            {results}
-            {errorMessage}
+            {setContent(process, results)}
         </div>
     );
 };
